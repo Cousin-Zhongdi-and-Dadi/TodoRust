@@ -6,11 +6,8 @@ use actix_web::{web, App, HttpServer};
 use sqlx::mysql::MySqlPoolOptions;
 use std::env;
 
-#[path="handlers.rs"]
 mod handlers;
-#[path="models.rs"]
 mod models;
-#[path="routers.rs"]
 mod routers;
 
 use routers::todo_routes;
@@ -21,6 +18,9 @@ async fn main() -> std::io::Result<()> {
     dotenv::dotenv().ok();
     // 获取数据库连接字符串，若未设置则 panic
     let database_url = env::var("DATABASE_URL").expect("DATABASE_URL must be set");
+    let base_url = env::var("BASE_URL").unwrap_or_else(|_| "localhost".to_string());
+    let port = env::var("PORT").unwrap_or_else(|_| "8080".to_string());
+    let port: u16 = port.parse().expect("PORT must be a valid number"); // 转换端口号为 u16
 
     // 创建 MySQL 数据库连接池，最大连接数为 5
     let pool = MySqlPoolOptions::new()
@@ -29,7 +29,7 @@ async fn main() -> std::io::Result<()> {
         .await
         .expect("Failed to create pool");
 
-    println!("Starting server at http://localhost:8080");
+    println!("Starting server at http://{}:{}", base_url, port);
 
     // 启动 Actix Web HTTP 服务器
     HttpServer::new(move || {
@@ -47,7 +47,7 @@ async fn main() -> std::io::Result<()> {
             .configure(todo_routes)
     })
         // 绑定到本地 8080 端口
-        .bind(("127.0.0.1", 8080))?
+        .bind((base_url, port))?
         .run()
         .await
 }
