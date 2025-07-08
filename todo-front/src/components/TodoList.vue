@@ -3,6 +3,7 @@ import { computed, onMounted, ref } from 'vue'
 import axios from 'axios'
 import { ElMessage } from 'element-plus'
 
+
 const axiosInstance = axios.create({
   baseURL: 'http://localhost:8080', // 后端的url
   timeout: 5000,
@@ -28,7 +29,7 @@ const fetchTodos = async () => {
     )
     todos.value = response.data
     await getAllCategories()
-  } catch (error) {
+  } catch (_) {
     ElMessage.error('查询待办事项失败')
   }
 }
